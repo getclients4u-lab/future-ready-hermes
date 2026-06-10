@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: future-ready-backend
+    runtime: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: future-ready-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: CORS_ORIGINS
+        value: '["https://frontend-static-one.vercel.app"]'
+      - key: GITHUB_REPO
+        value: 'getclients4u-lab/future-ready-hermes'
+    healthCheckPath: /health
+
+databases:
+  - name: future-ready-db
+    plan: free
+    ipAllowList: []

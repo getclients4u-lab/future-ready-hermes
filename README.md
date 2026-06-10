@@ -2,6 +2,45 @@
 
 A comprehensive full-stack code generation platform built for OpenClaw and Hermes agent orchestration.
 
+## Live Demo
+
+- **Frontend:** https://frontend-static-one.vercel.app
+- **Backend API:** Deploy via Render (see below)
+
+## Quick Deploy
+
+### Frontend (Vercel)
+Already deployed at: https://frontend-static-one.vercel.app
+
+### Backend (Render)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/getclients4u-lab/future-ready-hermes)
+
+1. Click the button above
+2. Create a free Render account (if needed)
+3. Add your `GITHUB_TOKEN` environment variable in Render dashboard
+4. Deploy completes in ~2 minutes
+
+### Local Development
+
+```bash
+# Clone
+git clone https://github.com/getclients4u-lab/future-ready-hermes.git
+cd future-ready-hermes
+
+# Backend
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+
+# Frontend
+cd frontend
+npm install
+npm run dev
+```
+
 ## Architecture
 
 ```
@@ -15,20 +54,6 @@ future-ready-hermes/
 ├── docs/              # Architecture and deployment guides
 ├── scripts/           # Automation and setup scripts
 └── .github/workflows/ # CI/CD pipelines
-```
-
-## Quick Start
-
-```bash
-# Backend
-cd backend
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-
-# Frontend
-cd frontend
-npm install
-npm run dev
 ```
 
 ## Skills (6 OpenClaw/Hermes Skills)
