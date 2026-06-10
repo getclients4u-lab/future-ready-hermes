@@ -1,34 +1,62 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from uuid import UUID
+from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.services.auth import get_current_user
+from app.models.project import Report, Project
 from app.models.user import User
+from app.services.auth import get_current_active_user
 
 router = APIRouter()
 
 
-@router.post("/generate")
-async def generate_report(
-    project_id: UUID,
-    format: str = "pdf",
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+@router.get("/")
+def list_reports(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
 ):
-    # Placeholder: integrate with report-generator service
-    return {
-        "project_id": str(project_id),
-        "format": format,
-        "status": "queued",
-        "download_url": None,
-    }
+    return (
+        db.query(Report)
+        .join(Project)
+        .filter(Project.owner_id == current_user.id)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+
+@router.post("/")
+def create_report(
+    project_id: str,
+    title: str,
+    format: str = "json",
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    project = db.query(Project).filter(Project.id == project_id, Project.owner_id == current_user.id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    report = Report(project_id=project_id, title=title, format=format)
+    db.add(report)
+    db.commit()
+    db.refresh(report)
+    return report
 
 
 @router.get("/{report_id}")
-async def get_report(
-    report_id: UUID,
-    current_user: User = Depends(get_current_user),
+def get_report(
+    report_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
 ):
-    # Placeholder
-    return {"report_id": str(report_id), "status": "completed", "url": None}
+    report = (
+        db.query(Report)
+        .join(Project)
+        .filter(Report.id == report_id, Project.owner_id == current_user.id)
+        .first()
+    )
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+    return report
