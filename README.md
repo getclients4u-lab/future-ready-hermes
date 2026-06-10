@@ -4,13 +4,21 @@ A comprehensive full-stack code generation platform built for OpenClaw and Herme
 
 ## Live Demo
 
-- **Frontend:** https://frontend-static-one.vercel.app
+- **Frontend:** https://frontend-phi-ruddy-77.vercel.app
 - **Backend API:** Deploy via Render (see below)
 
 ## Quick Deploy
 
-### Frontend (Vercel)
-Already deployed at: https://frontend-static-one.vercel.app
+### Frontend (Vercel) ✅ LIVE
+**URL:** https://frontend-phi-ruddy-77.vercel.app
+
+Pages:
+- `/` — Homepage with feature overview
+- `/dashboard` — Project management dashboard
+- `/login` — Authentication
+- `/projects` — Project list
+- `/projects/new` — Create new project
+- `/reports` — Generated reports
 
 ### Backend (Render)
 
@@ -18,8 +26,17 @@ Already deployed at: https://frontend-static-one.vercel.app
 
 1. Click the button above
 2. Create a free Render account (if needed)
-3. Add your `GITHUB_TOKEN` environment variable in Render dashboard
-4. Deploy completes in ~2 minutes
+3. Deploy completes in ~2 minutes
+
+**API Endpoints:**
+- `GET /health` — Health check
+- `POST /api/v1/auth/register` — Register user
+- `POST /api/v1/auth/login` — Login (OAuth2)
+- `GET /api/v1/auth/me` — Get current user
+- `GET /api/v1/users/` — List users
+- `GET /api/v1/projects/` — List projects
+- `POST /api/v1/projects/` — Create project
+- `GET /api/v1/reports/` — List reports
 
 ### Local Development
 
@@ -45,15 +62,15 @@ npm run dev
 
 ```
 future-ready-hermes/
-├── frontend/          # Next.js 14+ App Router frontend
-├── backend/           # FastAPI Python backend
+├── frontend/          # Next.js 14+ App Router frontend (deployed to Vercel)
+├── backend/           # FastAPI Python backend (deploy to Render)
 ├── data/              # Database migrations and seeds
 ├── reports/           # PDF report templates and outputs
 ├── templates/         # OpenClaw skills, prompts, schemas
 ├── tests/             # Unit, integration, and E2E tests
 ├── docs/              # Architecture and deployment guides
 ├── scripts/           # Automation and setup scripts
-└── .github/workflows/ # CI/CD pipelines
+└── render.yaml        # One-click Render deploy config
 ```
 
 ## Skills (6 OpenClaw/Hermes Skills)
