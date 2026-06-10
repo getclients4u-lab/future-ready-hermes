@@ -1,0 +1,55 @@
+{
+  "name": "future-ready-hermes",
+  "version": "1.0.0",
+  "description": "AI-powered full-stack code generation platform with 6 specialized agents",
+  "author": "FutureReady Team",
+  "skills": [
+    "templates/skills/orchestrator.md",
+    "templates/skills/requirements-analyst.md",
+    "templates/skills/backend-developer.md",
+    "templates/skills/frontend-developer.md",
+    "templates/skills/database-architect.md",
+    "templates/skills/devops-engineer.md",
+    "templates/skills/report-generator.md"
+  ],
+  "entrypoint": "templates/skills/orchestrator.md",
+  "schemas": [
+    "templates/schemas/project-schema.json",
+    "templates/schemas/user-schema.json",
+    "templates/schemas/report-schema.json",
+    "templates/schemas/api-contract.yaml"
+  ],
+  "prompts": "templates/prompts/prompt-library.md",
+  "backend": {
+    "framework": "fastapi",
+    "language": "python",
+    "python_version": ">=3.11",
+    "entry": "backend/app/main.py"
+  },
+  "frontend": {
+    "framework": "nextjs",
+    "language": "typescript",
+    "node_version": ">=20",
+    "entry": "frontend/app/layout.tsx"
+  },
+  "database": {
+    "type": "postgresql",
+    "version": ">=15",
+    "orm": "sqlalchemy",
+    "migrations": "alembic"
+  },
+  "deployment": {
+    "frontend": "vercel",
+    "backend": "docker",
+    "database": "postgresql",
+    "cache": "redis",
+    "storage": "github"
+  },
+  "docs": [
+    "docs/architecture.md",
+    "docs/authentication.md",
+    "docs/deployment.md",
+    "docs/github-storage-architecture.md",
+    "docs/test-plan.md"
+  ]
+}

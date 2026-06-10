@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://futureready.dev/schemas/report.json",
+  "title": "Report",
+  "type": "object",
+  "required": ["project_id", "format"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "project_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "format": {
+      "type": "string",
+      "enum": ["pdf", "json"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["queued", "processing", "completed", "failed"],
+      "default": "queued"
+    },
+    "download_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "generated_by": { "type": "string" },
+        "pages": { "type": "integer" },
+        "file_size_bytes": { "type": "integer" }
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
