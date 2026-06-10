@@ -16,7 +16,7 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/myocjade511/future-ready-hermes.git
+git clone https://github.com/getclients4u-lab/future-ready-hermes.git
 cd future-ready-hermes
 
 # Start all services
