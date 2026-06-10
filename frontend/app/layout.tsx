@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FutureReady — AI-Powered Build Platform",
-  description: "Generate production-ready full-stack applications with AI agents",
+  title: "FutureReady \u2014 AI Build Platform",
+  description: "Describe your idea. Our agents build it.",
 };
 
 export default function RootLayout({
