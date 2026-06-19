@@ -171,6 +171,44 @@
           </h2>
           <div id="artifactsList" class="space-y-3"></div>
         </div>
+
+        <!-- Export Actions -->
+        <div id="exportPanel" class="bg-slate-900 border border-slate-800 rounded-xl p-6 hidden">
+          <h2 class="font-semibold text-lg mb-4 flex items-center gap-2">
+            <i data-lucide="rocket" class="w-5 h-5 text-indigo-400"></i>
+            Export & Deploy
+          </h2>
+          <div id="exportActions" class="space-y-3">
+            <button id="generateCodeBtn" onclick="generateRealCode()" 
+              class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-medium py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+              <i data-lucide="code-2" class="w-4 h-4"></i>
+              Generate Real Code
+            </button>
+            <div id="exportButtons" class="hidden grid grid-cols-2 gap-3">
+              <button onclick="pushToGitHub()" 
+                class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-medium py-2.5 rounded-lg transition-all flex items-center justify-center gap-2">
+                <i data-lucide="github" class="w-4 h-4"></i>
+                Push to GitHub
+              </button>
+              <button onclick="downloadZip()" 
+                class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-medium py-2.5 rounded-lg transition-all flex items-center justify-center gap-2">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                Download ZIP
+              </button>
+            </div>
+            <div id="deployButtons" class="hidden space-y-2">
+              <a id="repoLink" href="#" target="_blank" 
+                class="block text-center bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg transition-all">
+                View on GitHub →
+              </a>
+              <a id="renderDeployLink" href="#" target="_blank"
+                class="block text-center bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-medium py-2.5 rounded-lg transition-all">
+                Deploy Backend to Render
+              </a>
+            </div>
+            <div id="exportStatus" class="text-xs font-mono"></div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -278,6 +316,7 @@
             document.getElementById('pipelineStatus').textContent = 'Complete';
             document.getElementById('pipelineStatus').className = 'text-xs text-emerald-400';
             showArtifacts(job.project_name, job.artifacts);
+            document.getElementById('exportPanel').classList.remove('hidden');
           }
         }
       } catch (e) {
@@ -621,6 +660,7 @@
       document.getElementById('pipelineStatus').className = 'text-xs text-emerald-400';
       
       showSimulationArtifacts(projectName);
+      document.getElementById('exportPanel').classList.remove('hidden');
       
       pipelineRunning = false;
       document.getElementById('runPipelineBtn').disabled = false;
@@ -657,6 +697,99 @@
       `).join('');
       
       lucide.createIcons();
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // OPTION C: Generate Real Code + Export
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    async function generateRealCode() {
+      if (!useApi || !currentJobId) {
+        log('❌ Connect to API first (enter backend URL and click Test connection)', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('generateCodeBtn');
+      const status = document.getElementById('exportStatus');
+      btn.disabled = true;
+      btn.classList.add('opacity-50');
+      status.innerHTML = '<span class="text-amber-400">⏳ Generating code from brief...</span>';
+
+      try {
+        const res = await fetch(`${apiBaseUrl}/api/v1/orchestrator/jobs/${currentJobId}/generate`, {
+          method: 'POST'
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.detail || 'Generation failed');
+
+        log(`✓ Generated ${data.file_count} files`, 'success');
+        status.innerHTML = `<span class="text-emerald-400">✓ Generated ${data.file_count} files at ${data.workspace}</span>`;
+
+        document.getElementById('exportButtons').classList.remove('hidden');
+        btn.classList.add('hidden');
+
+      } catch (e) {
+        log(`❌ Generation failed: ${e.message}`, 'error');
+        status.innerHTML = `<span class="text-red-400">❌ ${e.message}</span>`;
+        btn.disabled = false;
+        btn.classList.remove('opacity-50');
+      }
+    }
+
+    async function pushToGitHub() {
+      if (!currentJobId) return;
+      const status = document.getElementById('exportStatus');
+      status.innerHTML = '<span class="text-amber-400">⏳ Creating GitHub repo and pushing...</span>';
+
+      try {
+        const res = await fetch(`${apiBaseUrl}/api/v1/orchestrator/jobs/${currentJobId}/github`, {
+          method: 'POST'
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.detail || 'GitHub push failed');
+
+        log(`✓ Pushed ${data.files_pushed} files to ${data.repo_url}`, 'success');
+        status.innerHTML = `<span class="text-emerald-400">✓ Published to GitHub!</span>`;
+
+        document.getElementById('exportButtons').classList.add('hidden');
+        document.getElementById('deployButtons').classList.remove('hidden');
+        document.getElementById('repoLink').href = data.repo_url;
+        document.getElementById('renderDeployLink').href = `https://render.com/deploy?repo=${data.repo_url}`;
+
+      } catch (e) {
+        log(`❌ GitHub push failed: ${e.message}`, 'error');
+        status.innerHTML = `<span class="text-red-400">❌ ${e.message}</span>`;
+      }
+    }
+
+    async function downloadZip() {
+      if (!currentJobId) return;
+      const status = document.getElementById('exportStatus');
+      status.innerHTML = '<span class="text-amber-400">⏳ Preparing ZIP...</span>';
+
+      try {
+        const res = await fetch(`${apiBaseUrl}/api/v1/orchestrator/jobs/${currentJobId}/download`);
+        if (!res.ok) throw new Error('Download failed');
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${document.getElementById('projectName').value || 'project'}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        log('✓ ZIP downloaded', 'success');
+        status.innerHTML = '<span class="text-emerald-400">✓ Download complete</span>';
+
+      } catch (e) {
+        log(`❌ Download failed: ${e.message}`, 'error');
+        status.innerHTML = `<span class="text-red-400">❌ ${e.message}</span>`;
+      }
     }
 
     function loadExample() {
