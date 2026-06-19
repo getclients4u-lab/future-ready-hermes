@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FutureReady Orchestrator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+    body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e2e8f0; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .gradient-text { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .pipeline-line { background: linear-gradient(180deg, #334155 0%, #334155 100%); width: 2px; position: absolute; left: 24px; top: 48px; bottom: 0; }
+    .pipeline-line.active { background: linear-gradient(180deg, #667eea 0%, #764ba2 100%); }
+    .skill-card { transition: all 0.3s ease; border: 1px solid #1e293b; }
+    .skill-card:hover { border-color: #667eea; transform: translateX(4px); }
+    .skill-card.running { border-color: #667eea; box-shadow: 0 0 20px rgba(102,126,234,0.2); }
+    .skill-card.completed { border-color: #10b981; }
+    .skill-card.error { border-color: #ef4444; }
+    .progress-bar { transition: width 0.5s ease; }
+    .log-line { opacity: 0; animation: fadeIn 0.3s forwards; }
+    @keyframes fadeIn { to { opacity: 1; } }
+    .pulse-dot { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .typing-cursor::after { content: '|'; animation: blink 1s infinite; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+          <i data-lucide="cpu" class="w-5 h-5 text-white"></i>
+        </div>
+        <span class="font-bold text-lg tracking-tight">FutureReady</span>
+        <span class="text-xs bg-slate-800 px-2 py-0.5 rounded-full text-slate-400 border border-slate-700">Orchestrator</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="index.html" class="text-sm text-slate-400 hover:text-white transition-colors">Home</a>
+        <a href="https://github.com/getclients4u-lab/future-ready-hermes" target="_blank" class="text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-1">
+          <i data-lucide="github" class="w-4 h-4"></i> GitHub
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Hero -->
+    <div class="text-center mb-10">
+      <h1 class="text-4xl md:text-5xl font-extrabold mb-4">
+        <span class="gradient-text">AI-Powered</span> Build Pipeline
+      </h1>
+      <p class="text-slate-400 text-lg max-w-2xl mx-auto">
+        Describe your project. Six specialized agents generate a complete full-stack application — database, backend, frontend, tests, and deployment.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <!-- LEFT: Input Panel -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Project Brief Input -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+          <h2 class="font-semibold text-lg mb-4 flex items-center gap-2">
+            <i data-lucide="file-text" class="w-5 h-5 text-indigo-400"></i>
+            Project Brief
+          </h2>
+          <textarea id="briefInput" rows="8" 
+            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm font-mono resize-none focus:outline-none focus:border-indigo-500 transition-colors"
+            placeholder="Describe your project... e.g., I need a SaaS platform for managing HVAC service appointments. Users should be able to book appointments, technicians need a dashboard to view schedules, and admins need analytics."></textarea>
+          
+          <div class="mt-4 grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-slate-500 mb-1 block">Project Name</label>
+              <input id="projectName" type="text" placeholder="my-awesome-app" 
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="text-xs text-slate-500 mb-1 block">Deployment Target</label>
+              <select id="deployTarget" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                <option value="vercel-render">Vercel + Render</option>
+                <option value="aws">AWS</option>
+                <option value="docker">Self-Hosted Docker</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-4 flex gap-2">
+            <button id="runPipelineBtn" onclick="runPipeline()" 
+              class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium py-2.5 rounded-lg transition-all flex items-center justify-center gap-2">
+              <i data-lucide="play" class="w-4 h-4"></i>
+              Run Pipeline
+            </button>
+            <button onclick="loadExample()" 
+              class="px-4 py-2.5 border border-slate-700 hover:border-slate-500 rounded-lg text-sm text-slate-400 hover:text-white transition-colors">
+              Example
+            </button>
+          </div>
+        </div>
+
+        <!-- API Config -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+          <h2 class="font-semibold text-lg mb-4 flex items-center gap-2">
+            <i data-lucide="settings" class="w-5 h-5 text-indigo-400"></i>
+            Orchestrator Config
+          </h2>
+          <div class="space-y-3">
+            <div>
+              <label class="text-xs text-slate-500 mb-1 block">API Base URL</label>
+              <input id="apiUrl" type="text" value="http://localhost:8000" 
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-indigo-500">
+            </div>
+            <div class="mt-4 flex items-center justify-between text-xs text-slate-500">
+              <span>Mode:</span>
+              <span id="modeIndicator" class="text-indigo-400 font-medium">Client-Side Simulation</span>
+            </div>
+            <p class="text-xs text-slate-600">
+              Change API URL above to connect to a real backend. <span class="text-indigo-400 cursor-pointer hover:underline" onclick="testApiConnection()">Test connection</span>
+            </p>
+            <div id="apiStatus" class="hidden mt-2 text-xs"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Pipeline + Output -->
+      <div class="lg:col-span-3 space-y-6">
+        <!-- Pipeline Visualization -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="font-semibold text-lg flex items-center gap-2">
+              <i data-lucide="git-branch" class="w-5 h-5 text-indigo-400"></i>
+              Pipeline
+            </h2>
+            <div id="pipelineStatus" class="text-xs text-slate-500">Ready</div>
+          </div>
+
+          <div class="relative space-y-4" id="pipelineContainer">
+            <!-- Skills injected by JS -->
+          </div>
+        </div>
+
+        <!-- Live Output -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-semibold text-lg flex items-center gap-2">
+              <i data-lucide="terminal" class="w-5 h-5 text-indigo-400"></i>
+              Live Output
+            </h2>
+            <button onclick="clearLogs()" class="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+              Clear
+            </button>
+          </div>
+          <div id="logOutput" class="bg-slate-950 rounded-lg p-4 h-64 overflow-y-auto font-mono text-xs space-y-1 border border-slate-800">
+            <div class="text-slate-600 italic">Waiting for pipeline start...</div>
+          </div>
+        </div>
+
+        <!-- Generated Artifacts -->
+        <div id="artifactsPanel" class="bg-slate-900 border border-slate-800 rounded-xl p-6 hidden">
+          <h2 class="font-semibold text-lg mb-4 flex items-center gap-2">
+            <i data-lucide="package" class="w-5 h-5 text-indigo-400"></i>
+            Generated Artifacts
+          </h2>
+          <div id="artifactsList" class="space-y-3"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const SKILLS = [
+      { id: 'requirements-analyst', name: 'Requirements Analyst', icon: 'search', color: 'indigo', duration: 3000, output: ['spec.json', 'user-stories.json', 'api-contract.yaml'] },
+      { id: 'database-architect', name: 'Database Architect', icon: 'database', color: 'blue', duration: 3500, output: ['schema.sql', 'migrations/', 'seed.py'] },
+      { id: 'backend-developer', name: 'Backend Developer', icon: 'server', color: 'emerald', duration: 6000, output: ['app/main.py', 'app/routers/', 'app/models.py', 'tests/'] },
+      { id: 'frontend-developer', name: 'Frontend Developer', icon: 'layout', color: 'amber', duration: 6000, output: ['app/page.tsx', 'components/', 'lib/api.ts', 'hooks/'] },
+      { id: 'devops-engineer', name: 'DevOps Engineer', icon: 'cloud', color: 'rose', duration: 4000, output: ['docker-compose.yml', '.github/workflows/', 'Dockerfile'] },
+      { id: 'report-generator', name: 'Report Generator', icon: 'file-check', color: 'purple', duration: 2500, output: ['README.md', 'CHANGELOG.md', 'project-summary.json'] }
+    ];
+
+    let pipelineRunning = false;
+    let currentPhase = -1;
+    let logs = [];
+    let useApi = false;
+    let apiBaseUrl = 'http://localhost:8000';
+    let currentJobId = null;
+    let pollInterval = null;
+
+    async function testApiConnection() {
+      apiBaseUrl = document.getElementById('apiUrl').value.trim().replace(/\/$/, '');
+      const statusDiv = document.getElementById('apiStatus');
+      const modeIndicator = document.getElementById('modeIndicator');
+      statusDiv.classList.remove('hidden');
+      statusDiv.innerHTML = '<span class="text-amber-400">Testing...</span>';
+      
+      try {
+        const res = await fetch(`${apiBaseUrl}/health`, { method: 'GET', signal: AbortSignal.timeout(5000) });
+        if (res.ok) {
+          const data = await res.json();
+          useApi = true;
+          statusDiv.innerHTML = `<span class="text-emerald-400">✓ Connected to ${data.service || 'FutureReady API'}</span>`;
+          modeIndicator.textContent = 'API Mode';
+          modeIndicator.className = 'text-emerald-400 font-medium';
+          log(`API connected: ${apiBaseUrl}`, 'success');
+        } else {
+          throw new Error('HTTP ' + res.status);
+        }
+      } catch (e) {
+        useApi = false;
+        statusDiv.innerHTML = `<span class="text-red-400">✗ Failed: ${e.message}. Using simulation.</span>`;
+        modeIndicator.textContent = 'Client-Side Simulation';
+        modeIndicator.className = 'text-indigo-400 font-medium';
+      }
+    }
+
+    async function runPipelineViaApi() {
+      const brief = document.getElementById('briefInput').value.trim();
+      const projectName = document.getElementById('projectName').value || 'untitled-project';
+      const deployTarget = document.getElementById('deployTarget').value;
+
+      try {
+        const res = await fetch(`${apiBaseUrl}/api/v1/orchestrator/jobs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            project_name: projectName,
+            brief: brief,
+            deployment_target: deployTarget
+          })
+        });
+        
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        currentJobId = data.job_id;
+        log(`Job created: ${currentJobId}`, 'success');
+        
+        // Start polling
+        pollInterval = setInterval(pollJobStatus, 1000);
+      } catch (e) {
+        log(`API error: ${e.message}. Falling back to simulation.`, 'error');
+        useApi = false;
+        runSimulation();
+      }
+    }
+
+    async function pollJobStatus() {
+      if (!currentJobId) return;
+      try {
+        const res = await fetch(`${apiBaseUrl}/api/v1/orchestrator/jobs/${currentJobId}`);
+        if (!res.ok) return;
+        const job = await res.json();
+        
+        // Update progress
+        document.getElementById('pipelineStatus').textContent = `${job.phase} (${job.progress}%)`;
+        
+        // Update logs
+        if (job.logs && job.logs.length > logs.length) {
+          job.logs.slice(logs.length).forEach(l => log(l.message, l.type));
+        }
+        
+        // Update skill cards based on phase
+        updateSkillCardsFromPhase(job.phase, job.progress);
+        
+        if (job.status === 'completed' || job.status === 'failed') {
+          clearInterval(pollInterval);
+          pipelineRunning = false;
+          document.getElementById('runPipelineBtn').disabled = false;
+          document.getElementById('runPipelineBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+          
+          if (job.status === 'completed') {
+            document.getElementById('pipelineStatus').textContent = 'Complete';
+            document.getElementById('pipelineStatus').className = 'text-xs text-emerald-400';
+            showArtifacts(job.project_name, job.artifacts);
+          }
+        }
+      } catch (e) {
+        console.error('Poll error:', e);
+      }
+    }
+
+    function updateSkillCardsFromPhase(phase, progress) {
+      // Map phase string to skill index
+      const skillIds = SKILLS.map(s => s.id);
+      const activeIndex = skillIds.findIndex(id => phase.includes(id));
+      
+      SKILLS.forEach((skill, i) => {
+        const progressBar = document.getElementById(`skill-progress-${skill.id}`);
+        const status = document.getElementById(`skill-status-${skill.id}`);
+        const card = document.getElementById(`skill-${skill.id}`);
+        
+        if (i < activeIndex) {
+          progressBar.style.width = '100%';
+          status.textContent = 'Completed';
+          status.className = 'text-emerald-400 mt-0.5';
+          card.classList.add('completed');
+        } else if (i === activeIndex) {
+          const phaseProgress = ((progress % 16) / 16) * 100; // rough per-phase progress
+          progressBar.style.width = `${phaseProgress}%`;
+          status.textContent = 'Running...';
+          status.className = `text-${skill.color}-400 mt-0.5`;
+          card.classList.add('running');
+        }
+      });
+    }
+
+    function showArtifacts(projectName, artifacts) {
+      const panel = document.getElementById('artifactsPanel');
+      const list = document.getElementById('artifactsList');
+      panel.classList.remove('hidden');
+      
+      list.innerHTML = artifacts.map(a => `
+        <div class="flex items-center justify-between bg-slate-950 rounded-lg p-3 border border-slate-800 hover:border-slate-600 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded bg-slate-800 flex items-center justify-center">
+              <i data-lucide="${a.type === 'code' ? 'code' : a.type === 'database' ? 'database' : a.type === 'infra' ? 'container' : 'file-text'}" class="w-4 h-4 text-indigo-400"></i>
+            </div>
+            <div>
+              <div class="text-sm font-medium">${a.name}</div>
+              <div class="text-xs text-slate-500">${a.path}</div>
+            </div>
+          </div>
+          <span class="text-xs text-slate-600 font-mono uppercase">${a.type}</span>
+        </div>
+      `).join('');
+      
+      lucide.createIcons();
+    }
+
+    function renderPipeline() {
+      const container = document.getElementById('pipelineContainer');
+      container.innerHTML = SKILLS.map((skill, i) => `
+        <div id="skill-${skill.id}" class="skill-card relative bg-slate-950 rounded-lg p-4 pl-14">
+          <div class="absolute left-4 top-4 w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center z-10 transition-all" id="skill-icon-${skill.id}">
+            <i data-lucide="${skill.icon}" class="w-4 h-4 text-slate-500"></i>
+          </div>
+          ${i < SKILLS.length - 1 ? '<div class="pipeline-line" id="line-'+skill.id+'"></div>' : ''}
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium text-sm">${skill.name}</h3>
+              <p class="text-xs text-slate-500 mt-0.5" id="skill-status-${skill.id}">Pending</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-600 font-mono" id="skill-timer-${skill.id}"></span>
+              <div id="skill-spinner-${skill.id}" class="hidden">
+                <div class="w-4 h-4 border-2 border-${skill.color}-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+              <i id="skill-check-${skill.id}" data-lucide="check-circle" class="w-4 h-4 text-emerald-500 hidden"></i>
+            </div>
+          </div>
+          <div class="mt-3 h-1 bg-slate-800 rounded-full overflow-hidden">
+            <div id="skill-progress-${skill.id}" class="progress-bar h-full bg-${skill.color}-500 w-0"></div>
+          </div>
+          <div id="skill-files-${skill.id}" class="mt-2 flex flex-wrap gap-1 hidden"></div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function log(message, type = 'info') {
+      const logOutput = document.getElementById('logOutput');
+      const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const colors = { info: 'text-slate-400', success: 'text-emerald-400', error: 'text-red-400', warn: 'text-amber-400', command: 'text-indigo-400' };
+      const line = document.createElement('div');
+      line.className = `log-line ${colors[type] || 'text-slate-400'}`;
+      line.innerHTML = `<span class="text-slate-600">[${timestamp}]</span> ${message}`;
+      logOutput.appendChild(line);
+      logOutput.scrollTop = logOutput.scrollHeight;
+      logs.push({ timestamp, message, type });
+    }
+
+    function clearLogs() {
+      document.getElementById('logOutput').innerHTML = '<div class="text-slate-600 italic">Waiting for pipeline start...</div>';
+      logs = [];
+    }
+
+    async function runSkill(skill, index) {
+      const card = document.getElementById(`skill-${skill.id}`);
+      const icon = document.getElementById(`skill-icon-${skill.id}`);
+      const status = document.getElementById(`skill-status-${skill.id}`);
+      const spinner = document.getElementById(`skill-spinner-${skill.id}`);
+      const check = document.getElementById(`skill-check-${skill.id}`);
+      const progress = document.getElementById(`skill-progress-${skill.id}`);
+      const timer = document.getElementById(`skill-timer-${skill.id}`);
+      const filesContainer = document.getElementById(`skill-files-${skill.id}`);
+      const line = document.getElementById(`line-${skill.id}`);
+
+      currentPhase = index;
+      card.classList.add('running');
+      icon.classList.add(`bg-${skill.color}-500/20`, `border-${skill.color}-500`);
+      icon.querySelector('svg').classList.add(`text-${skill.color}-400`);
+      status.textContent = 'Running...';
+      status.classList.add(`text-${skill.color}-400`);
+      spinner.classList.remove('hidden');
+      filesContainer.classList.remove('hidden');
+
+      log(`▶ Starting ${skill.name}...`, 'command');
+
+      // Simulate progress
+      const steps = 10;
+      const stepTime = skill.duration / steps;
+      let elapsed = 0;
+
+      const messages = getSkillMessages(skill.id);
+      
+      for (let i = 0; i <= steps; i++) {
+        await sleep(stepTime);
+        elapsed += stepTime;
+        const pct = (i / steps) * 100;
+        progress.style.width = `${pct}%`;
+        timer.textContent = `${(elapsed / 1000).toFixed(1)}s`;
+        
+        if (messages[i]) {
+          log(messages[i], 'info');
+        }
+
+        // Show files as they're generated
+        if (i === Math.floor(steps * 0.7)) {
+          skill.output.forEach((file, fi) => {
+            setTimeout(() => {
+              const chip = document.createElement('span');
+              chip.className = `text-xs px-2 py-0.5 bg-${skill.color}-500/10 text-${skill.color}-400 rounded border border-${skill.color}-500/20`;
+              chip.textContent = file;
+              filesContainer.appendChild(chip);
+            }, fi * 200);
+          });
+        }
+      }
+
+      // Complete
+      card.classList.remove('running');
+      card.classList.add('completed');
+      spinner.classList.add('hidden');
+      check.classList.remove('hidden');
+      status.textContent = 'Completed';
+      status.classList.remove(`text-${skill.color}-400`);
+      status.classList.add('text-emerald-400');
+      progress.style.width = '100%';
+      if (line) line.classList.add('active');
+
+      log(`✓ ${skill.name} completed`, 'success');
+      lucide.createIcons();
+    }
+
+    function getSkillMessages(skillId) {
+      const msgs = {
+        'requirements-analyst': [
+          'Parsing project brief...',
+          'Identifying core entities: users, appointments, technicians...',
+          'Mapping CRUD operations to REST endpoints...',
+          'Deriving database schema (3NF)...',
+          'Listing UI pages with route + component needs...',
+          'Determining auth strategy: JWT + role-based...',
+          'Writing spec.json...',
+          'Writing user-stories.json...',
+          'Drafting api-contract.yaml...',
+          'Validating specification completeness...'
+        ],
+        'database-architect': [
+          'Reading spec.json...',
+          'Mapping tables: users, appointments, schedules, analytics...',
+          'Defining relations: 1:N users→appointments...',
+          'Adding timestamps and UUID defaults...',
+          'Generating schema.sql...',
+          'Creating migration stub 001_init...',
+          'Writing seed.py with realistic data...',
+          'Generating ERD diagram...',
+          'Indexing foreign keys...',
+          'Validating schema against API contract...'
+        ],
+        'backend-developer': [
+          'Reading spec + schema...',
+          'Generating Pydantic schemas (Create, Read, Update)...',
+          'Generating SQLAlchemy models...',
+          'Building auth service with bcrypt...',
+          'Creating CRUD service layer...',
+          'Generating FastAPI routers...',
+          'Wiring dependencies (DB, current_user)...',
+          'Writing pytest tests...',
+          'Generating Dockerfile...',
+          'Running test suite...'
+        ],
+        'frontend-developer': [
+          'Reading spec + API contract...',
+          'Generating TypeScript interfaces...',
+          'Building API client (lib/api.ts)...',
+          'Creating useAuth hook...',
+          'Generating page components...',
+          'Building reusable form components...',
+          'Styling with Tailwind CSS...',
+          'Adding loading + error boundaries...',
+          'Configuring next.config.js...',
+          'Running build check...'
+        ],
+        'devops-engineer': [
+          'Analyzing deployment target...',
+          'Generating docker-compose.yml...',
+          'Creating multi-stage Dockerfiles...',
+          'Writing GitHub Actions CI workflow...',
+          'Writing deploy-backend.yml...',
+          'Writing deploy-frontend.yml...',
+          'Generating render.yaml blueprint...',
+          'Creating environment templates...',
+          'Writing health-check script...',
+          'Validating docker-compose up...'
+        ],
+        'report-generator': [
+          'Scanning workspace artifacts...',
+          'Reading spec.json...',
+          'Generating README.md...',
+          'Generating API.md from routers...',
+          'Writing CHANGELOG.md...',
+          'Building project-summary.json...',
+          'Calculating build timeline...',
+          'Estimating infrastructure costs...',
+          'Finalizing documentation...',
+          'Pipeline complete!'
+        ]
+      };
+      return msgs[skillId] || [];
+    }
+
+    async function runPipeline() {
+      if (pipelineRunning) return;
+      
+      const brief = document.getElementById('briefInput').value.trim();
+      if (!brief) {
+        alert('Please enter a project brief');
+        return;
+      }
+
+      pipelineRunning = true;
+      document.getElementById('runPipelineBtn').disabled = true;
+      document.getElementById('runPipelineBtn').classList.add('opacity-50', 'cursor-not-allowed');
+      document.getElementById('pipelineStatus').textContent = 'Running...';
+      document.getElementById('pipelineStatus').className = 'text-xs text-indigo-400 pulse-dot';
+      document.getElementById('artifactsPanel').classList.add('hidden');
+
+      clearLogs();
+      renderPipeline();
+      
+      if (useApi) {
+        await runPipelineViaApi();
+      } else {
+        await runSimulation();
+      }
+    }
+
+    async function runSimulation() {
+      const projectName = document.getElementById('projectName').value || 'untitled-project';
+      const deployTarget = document.getElementById('deployTarget').value;
+
+      log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, 'info');
+      log(`🚀 FutureReady Orchestrator v1.0.0`, 'info');
+      log(`Project: ${projectName}`, 'info');
+      log(`Deployment: ${deployTarget}`, 'info');
+      log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, 'info');
+      log(``, 'info');
+
+      // Phase 1: Discovery
+      log(`📋 PHASE 1: Discovery & Specification`, 'warn');
+      await runSkill(SKILLS[0], 0);
+
+      // User approval gate (simulated)
+      await sleep(500);
+      log(`⏳ Waiting for spec approval...`, 'warn');
+      await sleep(1000);
+      log(`✓ Specification approved`, 'success');
+      log(``, 'info');
+
+      // Phase 2: Foundation
+      log(`🏗️ PHASE 2: Foundation`, 'warn');
+      await runSkill(SKILLS[1], 1);
+      log(``, 'info');
+
+      // Phase 3: Backend
+      log(`⚙️ PHASE 3: Backend Implementation`, 'warn');
+      await runSkill(SKILLS[2], 2);
+      log(`Running pytest suite...`, 'command');
+      await sleep(800);
+      log(`✓ 24 tests passed (coverage: 87%)`, 'success');
+      log(``, 'info');
+
+      // Phase 4: Frontend
+      log(`🎨 PHASE 4: Frontend Implementation`, 'warn');
+      await runSkill(SKILLS[3], 3);
+      log(`Running build check...`, 'command');
+      await sleep(600);
+      log(`✓ Build successful`, 'success');
+      log(``, 'info');
+
+      // Phase 5: DevOps
+      log(`🚀 PHASE 5: DevOps (Parallel)`, 'warn');
+      await runSkill(SKILLS[4], 4);
+      log(`Validating docker-compose...`, 'command');
+      await sleep(500);
+      log(`✓ All services healthy`, 'success');
+      log(``, 'info');
+
+      // Phase 6: Report
+      log(`📊 PHASE 6: Integration & Reporting`, 'warn');
+      await runSkill(SKILLS[5], 5);
+
+      // Final
+      await sleep(500);
+      log(``, 'info');
+      log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, 'info');
+      log(`✅ PIPELINE COMPLETE`, 'success');
+      log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, 'info');
+      log(`Generated 68 files | ~4,200 lines of code`, 'info');
+      log(`Tech: FastAPI + Next.js + PostgreSQL`, 'info');
+      log(`Ready for deployment`, 'info');
+
+      document.getElementById('pipelineStatus').textContent = 'Complete';
+      document.getElementById('pipelineStatus').className = 'text-xs text-emerald-400';
+      
+      showSimulationArtifacts(projectName);
+      
+      pipelineRunning = false;
+      document.getElementById('runPipelineBtn').disabled = false;
+      document.getElementById('runPipelineBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+
+    function showSimulationArtifacts(projectName) {
+      const panel = document.getElementById('artifactsPanel');
+      const list = document.getElementById('artifactsList');
+      panel.classList.remove('hidden');
+      
+      const artifacts = [
+        { name: 'spec.json', desc: 'Technical specification', size: '4.2 KB', icon: 'file-json' },
+        { name: 'schema.sql', desc: 'Database schema', size: '2.8 KB', icon: 'database' },
+        { name: 'backend/', desc: 'FastAPI application', size: '28 files', icon: 'server' },
+        { name: 'frontend/', desc: 'Next.js application', size: '15 files', icon: 'layout' },
+        { name: 'docker-compose.yml', desc: 'Docker orchestration', size: '1.5 KB', icon: 'container' },
+        { name: 'README.md', desc: 'Project documentation', size: '6.1 KB', icon: 'book-open' }
+      ];
+
+      list.innerHTML = artifacts.map(a => `
+        <div class="flex items-center justify-between bg-slate-950 rounded-lg p-3 border border-slate-800 hover:border-slate-600 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded bg-slate-800 flex items-center justify-center">
+              <i data-lucide="${a.icon}" class="w-4 h-4 text-indigo-400"></i>
+            </div>
+            <div>
+              <div class="text-sm font-medium">${a.name}</div>
+              <div class="text-xs text-slate-500">${a.desc}</div>
+            </div>
+          </div>
+          <span class="text-xs text-slate-600 font-mono">${a.size}</span>
+        </div>
+      `).join('');
+      
+      lucide.createIcons();
+    }
+
+    function loadExample() {
+      document.getElementById('projectName').value = 'hvac-pro-scheduler';
+      document.getElementById('briefInput').value = `I need a SaaS platform for HVAC service companies to manage appointments and technicians.
+
+Key features:
+- Customers book appointments online with date/time selection
+- Technicians see their daily schedule on a mobile-friendly dashboard  
+- Admins can assign jobs, view all appointments, and see revenue analytics
+- SMS/email reminders to customers before appointments
+- Photo upload for technicians to document work completed
+- Invoice generation with Stripe payment integration
+
+Users: customers (homeowners), technicians (field workers), admins (office staff)
+Auth: email/password + optional Google OAuth
+Tech: FastAPI backend, Next.js frontend, PostgreSQL database
+Deploy: Vercel frontend, Render backend`;
+    }
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    // Init
+    renderPipeline();
+    lucide.createIcons();
+  </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FutureReady — AI-Powered Build Platform</title>
+  <title>FutureReady \u2014 AI Build Platform</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -11,64 +11,448 @@
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
       color: #f8fafc;
       min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    nav {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
+      padding: 1.5rem 3rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
-    .container {
-      text-align: center;
-      max-width: 600px;
-      padding: 2rem;
-    }
-    h1 {
-      font-size: 3.5rem;
+    .logo {
+      font-size: 1.5rem;
       font-weight: 800;
-      margin-bottom: 1rem;
       background: linear-gradient(90deg, #60a5fa, #a78bfa);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    p {
-      font-size: 1.25rem;
-      color: #94a3b8;
-      margin-bottom: 2rem;
-      line-height: 1.6;
-    }
-    .btn {
-      display: inline-block;
-      padding: 0.875rem 2rem;
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a { color: #94a3b8; font-size: 0.95rem; }
+    .cta-nav {
+      padding: 0.5rem 1rem;
       background: #3b82f6;
-      color: white;
-      text-decoration: none;
+      color: #fff;
       border-radius: 0.5rem;
       font-weight: 600;
-      transition: all 0.2s;
+      font-size: 0.875rem;
     }
-    .btn:hover {
-      background: #2563eb;
-      transform: translateY(-1px);
+    .hero {
+      text-align: center;
+      padding: 6rem 2rem;
+      max-width: 800px;
+      margin: 0 auto;
     }
-    .status {
-      margin-top: 3rem;
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(90deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.25rem;
+      color: #94a3b8;
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+    .cta {
+      display: inline-block;
+      padding: 1rem 2.5rem;
+      background: #3b82f6;
+      color: #fff;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    .section { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; }
+    .section h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .pipeline {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      align-items: center;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
       padding: 1rem;
       background: rgba(255,255,255,0.05);
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
-      color: #64748b;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      min-width: 220px;
     }
-    .status span {
-      color: #34d399;
+    .step-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700;
+      color: #0f172a; flex-shrink: 0;
+    }
+    .step-info { display: flex; flex-direction: column; font-size: 0.875rem; }
+    .step-info strong { font-size: 0.9rem; }
+    .step-info span { color: #94a3b8; font-size: 0.75rem; }
+    .arrow { color: #64748b; font-size: 1.25rem; font-weight: 700; }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+    .feature-card {
+      padding: 1.5rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 0.75rem;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .feature-card h3 { margin-bottom: 0.5rem; font-size: 1rem; }
+    .feature-card p { color: #94a3b8; font-size: 0.875rem; }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      color: #64748b;
+      font-size: 0.875rem;
+    }
+    .build-page { display: none; }
+    .build-page.active { display: block; }
+    .form-card {
+      max-width: 700px;
+      margin: 3rem auto;
+      padding: 2rem;
+      background: rgba(255,255,255,0.03);
+      border-radius: 1rem;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .form-card label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: #cbd5e1;
+    }
+    .form-card input, .form-card textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.5rem;
+      color: #f8fafc;
+      font-size: 1rem;
+      outline: none;
+      margin-bottom: 1.25rem;
+      font-family: inherit;
+    }
+    .form-card button {
+      width: 100%;
+      padding: 0.875rem;
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .form-card button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .pipeline-run { max-width: 800px; margin: 2rem auto; }
+    .agent-card {
+      padding: 1rem;
+      background: rgba(255,255,255,0.03);
+      border-radius: 0.5rem;
+      border: 1px solid rgba(255,255,255,0.05);
+      margin-bottom: 0.75rem;
+    }
+    .agent-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .agent-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700;
+      color: #0f172a; flex-shrink: 0;
+      transition: opacity 0.3s;
+    }
+    .agent-info { display: flex; flex-direction: column; font-size: 0.875rem; }
+    .agent-status { font-size: 0.75rem; color: #94a3b8; }
+    .progress-bar {
+      margin-top: 0.75rem;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      animation: progress 2s ease-in-out forwards;
+    }
+    @keyframes progress { to { width: 100%; } }
+    .agent-output {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: rgba(0,0,0,0.3);
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+      font-family: monospace;
+      color: #94a3b8;
+      white-space: pre-wrap;
+      line-height: 1.6;
+    }
+    .results { max-width: 900px; margin: 2rem auto; }
+    .artifact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0 2rem;
+    }
+    .artifact-card {
+      padding: 1rem;
+      background: rgba(255,255,255,0.03);
+      border-radius: 0.5rem;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .artifact-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+    .file-list { list-style: none; padding: 0; margin: 0; }
+    .file-item {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      padding: 0.25rem 0;
+      font-family: monospace;
+    }
+    .actions { display: flex; gap: 1rem; }
+    .actions a, .actions button {
+      flex: 1;
+      padding: 0.875rem;
+      text-align: center;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      font-size: 1rem;
+    }
+    .primary-btn { background: #3b82f6; color: #fff; }
+    .secondary-btn { background: rgba(255,255,255,0.05); color: #f8fafc; border: 1px solid rgba(255,255,255,0.1); }
+    .success-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+    .success-icon {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: #34d399;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; color: #0f172a; font-weight: 700;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>FutureReady</h1>
-    <p>AI-powered full-stack code generation. Describe your idea, and our agents build it.</p>
-    <a href="https://github.com/getclients4u-lab/future-ready-hermes" class="btn">View on GitHub</a>
-    <div class="status">
-      <span>●</span> Frontend Live &nbsp;|&nbsp; Backend Deploying
+  <div id="home-page">
+    <nav>
+      <div class="logo">FutureReady</div>
+      <div class="nav-links">
+        <a href="https://github.com/getclients4u-lab/future-ready-hermes" target="_blank">GitHub</a>
+        <a href="#" onclick="showBuild()" class="cta-nav">Start Building</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <h1>AI Agents That<br>Build Full-Stack Apps</h1>
+      <p>Describe your idea. Our 6 specialized agents generate production-ready code in minutes.</p>
+      <a href="#" onclick="showBuild()" class="cta">Start Building →</a>
+    </section>
+
+    <section class="section">
+      <h2>The Pipeline</h2>
+      <div class="pipeline">
+        <div class="step">
+          <div class="step-dot" style="background:#60a5fa">1</div>
+          <div class="step-info"><strong>Requirements Analyst</strong><span>Parses brief into specs</span></div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step">
+          <div class="step-dot" style="background:#a78bfa">2</div>
+          <div class="step-info"><strong>Database Architect</strong><span>Designs schema & migrations</span></div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step">
+          <div class="step-dot" style="background:#34d399">3</div>
+          <div class="step-info"><strong>Backend Developer</strong><span>Generates FastAPI code</span></div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step">
+          <div class="step-dot" style="background:#fbbf24">4</div>
+          <div class="step-info"><strong>Frontend Developer</strong><span>Generates Next.js code</span></div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step">
+          <div class="step-dot" style="background:#f87171">5</div>
+          <div class="step-info"><strong>DevOps Engineer</strong><span>CI/CD & infrastructure</span></div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step">
+          <div class="step-dot" style="background:#fb923c">6</div>
+          <div class="step-info"><strong>Report Generator</strong><span>PDF & JSON summaries</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>What You Get</h2>
+      <div class="features">
+        <div class="feature-card"><h3>Complete Repo</h3><p>50+ files with full project structure</p></div>
+        <div class="feature-card"><h3>Working Backend</h3><p>FastAPI with auth, CRUD, tests</p></div>
+        <div class="feature-card"><h3>Working Frontend</h3><p>Next.js with routing, forms, API calls</p></div>
+        <div class="feature-card"><h3>Database Schema</h3><p>PostgreSQL + Alembic migrations</p></div>
+        <div class="feature-card"><h3>CI/CD Pipeline</h3><p>GitHub Actions for deploy</p></div>
+        <div class="feature-card"><h3>PDF Report</h3><p>Project summary & architecture</p></div>
+      </div>
+    </section>
+
+    <footer><p>© 2026 FutureReady. OpenClaw + Hermes.</p></footer>
+  </div>
+
+  <div id="build-page" class="build-page">
+    <nav>
+      <a href="#" onclick="showHome()" class="logo">FutureReady</a>
+      <div class="nav-links">
+        <a href="https://github.com/getclients4u-lab/future-ready-hermes" target="_blank">GitHub</a>
+        <a href="#" onclick="showHome()">Home</a>
+      </div>
+    </nav>
+
+    <div id="step-1" class="form-card">
+      <h1 style="font-size:1.75rem;font-weight:700;margin-bottom:0.5rem">Describe Your Project</h1>
+      <p style="color:#94a3b8;margin-bottom:2rem">Tell us what you want to build.</p>
+      <label>Project Name</label>
+      <input type="text" id="project-name" placeholder="e.g., E-Commerce Platform">
+      <label>Project Brief</label>
+      <textarea id="project-brief" rows="5" placeholder="I want a platform where users can browse products..."></textarea>
+      <button onclick="startBuild()">Start Build →</button>
+    </div>
+
+    <div id="step-2" class="pipeline-run" style="display:none"></div>
+
+    <div id="step-3" class="results" style="display:none">
+      <div class="form-card">
+        <div class="success-header">
+          <div class="success-icon">✓</div>
+          <h1 style="font-size:1.75rem;font-weight:700">Build Complete!</h1>
+        </div>
+        <p style="color:#94a3b8;margin-bottom:1.5rem">Generated <strong id="total-files">0</strong> files across <strong>6</strong> agents.</p>
+        <div id="artifact-grid" class="artifact-grid"></div>
+        <div class="actions">
+          <a href="https://github.com/getclients4u-lab/future-ready-hermes" target="_blank" class="primary-btn">View on GitHub</a>
+          <button onclick="showHome()" class="secondary-btn">Build Another</button>
+        </div>
+      </div>
     </div>
   </div>
+
+  <script>
+    function showBuild() {
+      document.getElementById('home-page').style.display = 'none';
+      document.getElementById('build-page').classList.add('active');
+      document.getElementById('step-1').style.display = 'block';
+      document.getElementById('step-2').style.display = 'none';
+      document.getElementById('step-3').style.display = 'none';
+    }
+    function showHome() {
+      document.getElementById('home-page').style.display = 'block';
+      document.getElementById('build-page').classList.remove('active');
+    }
+
+    const AGENTS = [
+      { id: 'requirements', name: 'Requirements Analyst', color: '#60a5fa', duration: 2000, output: '\u2713 Parsed brief\n\u2713 Generated user stories (12)\n\u2713 Drafted OpenAPI spec\n\u2713 Recommended stack: Next.js + FastAPI + PostgreSQL', files: ['spec.md', 'user-stories.json', 'api-contract.yaml', 'tech-stack.md'] },
+      { id: 'database', name: 'Database Architect', color: '#a78bfa', duration: 2500, output: '\u2713 Designed 8 entities\n\u2713 Created migration files\n\u2713 Generated ORM models\n\u2713 Added indexes and constraints', files: ['schema.sql', 'alembic/env.py', 'models/user.py', 'models/product.py', 'models/order.py'] },
+      { id: 'backend', name: 'Backend Developer', color: '#34d399', duration: 4000, output: '\u2713 Generated FastAPI app\n\u2713 Auth with JWT\n\u2713 CRUD routers\n\u2713 Pytest tests\n\u2713 Dockerfile', files: ['app/main.py', 'routers/auth.py', 'routers/products.py', 'routers/cart.py', 'routers/orders.py', 'services/stripe.py', 'tests/test_orders.py', 'Dockerfile'] },
+      { id: 'frontend', name: 'Frontend Developer', color: '#fbbf24', duration: 4000, output: '\u2713 Generated Next.js app\n\u2713 8 pages with routing\n\u2713 API client with axios\n\u2713 Forms with validation\n\u2713 Dark theme', files: ['app/page.tsx', 'app/products/page.tsx', 'app/product/[id]/page.tsx', 'app/cart/page.tsx', 'app/checkout/page.tsx', 'app/admin/page.tsx', 'components/ProductCard.tsx', 'lib/api.ts'] },
+      { id: 'devops', name: 'DevOps Engineer', color: '#f87171', duration: 2000, output: '\u2713 GitHub Actions CI/CD\n\u2713 Docker Compose\n\u2713 Terraform VPC\n\u2713 Render deploy config', files: ['.github/workflows/ci.yml', '.github/workflows/deploy.yml', 'docker-compose.yml', 'infra/terraform/main.tf', 'render.yaml'] },
+      { id: 'report', name: 'Report Generator', color: '#fb923c', duration: 1500, output: '\u2713 Generated PDF report\n\u2713 Architecture diagram\n\u2713 API documentation\n\u2713 Test coverage summary', files: ['reports/project-summary.pdf', 'reports/architecture.svg', 'reports/test-coverage.html'] },
+    ];
+
+    function startBuild() {
+      const name = document.getElementById('project-name').value;
+      const brief = document.getElementById('project-brief').value;
+      if (!brief.trim()) return alert('Please enter a project brief');
+
+      document.getElementById('step-1').style.display = 'none';
+      document.getElementById('step-2').style.display = 'block';
+      const container = document.getElementById('step-2');
+      container.innerHTML = '<h2 style="text-align:center;margin-bottom:2rem">Building: ' + (name || 'Untitled Project') + '</h2>';
+
+      let current = 0;
+      function runAgent() {
+        if (current >= AGENTS.length) {
+          setTimeout(showResults, 500);
+          return;
+        }
+        const agent = AGENTS[current];
+        const card = document.createElement('div');
+        card.className = 'agent-card';
+        card.id = 'agent-' + current;
+        card.innerHTML = `
+          <div class="agent-header">
+            <div class="agent-dot" style="background:${agent.color}">${current + 1}</div>
+            <div class="agent-info">
+              <strong>${agent.name}</strong>
+              <span class="agent-status" id="status-${current}">Running...</span>
+            </div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="background:${agent.color}"></div></div>
+        `;
+        container.appendChild(card);
+
+        setTimeout(() => {
+          document.getElementById('status-' + current).innerHTML = '<span style="color:#34d399">Done — ' + agent.files.length + ' files</span>';
+          const output = document.createElement('pre');
+          output.className = 'agent-output';
+          output.textContent = agent.output;
+          card.appendChild(output);
+          current++;
+          runAgent();
+        }, agent.duration);
+      }
+      runAgent();
+    }
+
+    function showResults() {
+      document.getElementById('step-2').style.display = 'none';
+      document.getElementById('step-3').style.display = 'block';
+      let total = 0;
+      const grid = document.getElementById('artifact-grid');
+      grid.innerHTML = '';
+      AGENTS.forEach((agent, i) => {
+        total += agent.files.length;
+        const card = document.createElement('div');
+        card.className = 'artifact-card';
+        card.innerHTML = `
+          <div class="artifact-header" style="border-color:${agent.color}">
+            <strong>${agent.name}</strong>
+            <span style="font-size:0.75rem;color:#94a3b8">${agent.files.length} files</span>
+          </div>
+          <ul class="file-list">${agent.files.slice(0,5).map(f => '<li class="file-item">' + f + '</li>').join('')}${agent.files.length > 5 ? '<li class="file-item" style="color:#64748b">+' + (agent.files.length - 5) + ' more</li>' : ''}</ul>
+        `;
+        grid.appendChild(card);
+      });
+      document.getElementById('total-files').textContent = total;
+    }
+  </script>
 </body>
 </html>

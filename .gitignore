@@ -42,3 +42,12 @@ coverage.xml
 # Playwright
 test-results/
 playwright-report/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Local experiments
+frontend-app/
+
