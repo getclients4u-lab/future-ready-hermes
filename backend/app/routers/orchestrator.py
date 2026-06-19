@@ -17,7 +17,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from app.services.code_generator import parse_brief, generate_project
 from app.services.github_service import create_repo, push_code, get_token
 
-router = APIRouter(prefix="/orchestrator", tags=["orchestrator"])
+router = APIRouter(tags=["orchestrator"])
 
 # In-memory job store (replace with Redis/DB in production)
 jobs = {}
