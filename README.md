@@ -4,21 +4,20 @@ A comprehensive full-stack code generation platform built for OpenClaw and Herme
 
 ## Live Demo
 
-- **Frontend:** https://frontend-phi-ruddy-77.vercel.app
+- **Orchestrator (NEW):** https://frontend-static-alpha.vercel.app/orchestrator.html
+- **Homepage:** https://frontend-static-alpha.vercel.app
 - **Backend API:** Deploy via Render (see below)
+
+> The old Next.js frontend at `frontend-phi-ruddy-77.vercel.app` is deprecated. Use the new static site above.
 
 ## Quick Deploy
 
 ### Frontend (Vercel) ✅ LIVE
-**URL:** https://frontend-phi-ruddy-77.vercel.app
+**URL:** https://frontend-static-alpha.vercel.app
 
 Pages:
 - `/` — Homepage with feature overview
-- `/dashboard` — Project management dashboard
-- `/login` — Authentication
-- `/projects` — Project list
-- `/projects/new` — Create new project
-- `/reports` — Generated reports
+- `/orchestrator.html` — **Interactive build pipeline** (input brief → run 6 agents)
 
 ### Backend (Render)
 
@@ -37,6 +36,9 @@ Pages:
 - `GET /api/v1/projects/` — List projects
 - `POST /api/v1/projects/` — Create project
 - `GET /api/v1/reports/` — List reports
+- `POST /api/v1/orchestrator/jobs` — **Submit project brief, start build pipeline**
+- `GET /api/v1/orchestrator/jobs/{id}` — **Poll job status + progress**
+- `GET /api/v1/orchestrator/jobs` — List all pipeline jobs
 
 ### Local Development
 
